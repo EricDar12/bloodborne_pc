@@ -72,13 +72,20 @@ def game_app_version(game):
         version=sfo((Path(game) / 'sce_sys/param.sfo').read_bytes()).get('APP_VER')
     except (OSError, ValueError, ImportError):
         return None
-    if version!='01.09' and eboot_is_109(str(Path(game).resolve()/'eboot.bin')):
-        return '01.09'
+    if version!='01.09':
+        eboot=Path(game).resolve()/'eboot.bin'
+        try:
+            stat=eboot.stat()
+        except OSError:
+            return version
+        # Keyed on size and time too: the launcher stays open while eboot.bin is replaced.
+        if eboot_is_109(str(eboot),stat.st_size,stat.st_mtime_ns):
+            return '01.09'
     return version
 
 
 @functools.lru_cache(maxsize=None)
-def eboot_is_109(path):
+def eboot_is_109(path,_size=None,_mtime=None):
     try:
         from prepare import parse_self
         elf=bytes(parse_self(Path(path).read_bytes())[0])
