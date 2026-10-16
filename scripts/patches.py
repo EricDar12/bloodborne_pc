@@ -90,7 +90,7 @@ def eboot_is_109(path,_size=None,_mtime=None):
         from prepare import parse_self
         elf=bytes(parse_self(Path(path).read_bytes())[0])
         return patch_fingerprint(elf,BUILTIN_XML,'01.09')==PATCH_FINGERPRINTS['01.09']
-    except (OSError, ValueError, KeyError, IndexError, struct.error, ImportError):
+    except (OSError, ValueError, KeyError, IndexError, TypeError, struct.error, ET.ParseError, ImportError):
         return False
 
 
